@@ -46,6 +46,7 @@ discocli send --to "#general" --text "Hello from the terminal!"
 | Command | Description |
 |---------|-------------|
 | `discocli auth` | Authenticate with Discord (bot or user token) |
+| `discocli whoami` | Show the currently authenticated user |
 | `discocli sync` | Sync message history to local SQLite database |
 | `discocli sync --follow` | Real-time sync via Discord Gateway |
 | `discocli search <query>` | Full-text search across synced messages |
