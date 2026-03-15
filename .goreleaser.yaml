@@ -1,0 +1,64 @@
+version: 2
+
+project_name: discocli
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: discocli
+    main: ./cmd/discocli/
+    binary: discocli
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X github.com/virat-mankali/discord-cli/cmd/discocli/commands.version={{.Version}}
+      - -X github.com/virat-mankali/discord-cli/cmd/discocli/commands.commit={{.Commit}}
+      - -X github.com/virat-mankali/discord-cli/cmd/discocli/commands.date={{.Date}}
+
+archives:
+  - id: default
+    format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - README.md
+      - LICENSE
+
+checksum:
+  name_template: "checksums.txt"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+      - Merge pull request
+      - Merge branch
+
+brews:
+  - name: discocli
+    repository:
+      owner: virat-mankali
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    homepage: "https://github.com/virat-mankali/discord-cli"
+    description: "Discord CLI — sync, search, send from your terminal. MCP-ready for AI agents."
+    license: "MIT"
+    test: |
+      system "#{bin}/discocli", "--version"
+    install: |
+      bin.install "discocli"
