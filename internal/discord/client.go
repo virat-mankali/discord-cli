@@ -21,10 +21,10 @@ func NewSession(token *StoredToken) (*discordgo.Session, error) {
 	return s, nil
 }
 
-// FetchMessages paginates through ALL messages in a channel
-// and calls onBatch for each batch of up to 100 messages.
-func FetchMessages(s *discordgo.Session, channelID string, onBatch func([]*discordgo.Message) error) error {
-	var beforeID string
+// FetchMessages paginates through messages in a channel oldest-first.
+// Pass beforeID to start from a specific point (for resumable sync).
+// Calls onBatch for each batch of up to 100 messages.
+func FetchMessages(s *discordgo.Session, channelID string, onBatch func([]*discordgo.Message) error, beforeID string) error {
 	for {
 		msgs, err := s.ChannelMessages(channelID, 100, beforeID, "", "")
 		if err != nil {
