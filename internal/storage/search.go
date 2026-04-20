@@ -38,7 +38,7 @@ func (db *DB) SearchMessages(query string, opts SearchOptions) ([]SearchResult, 
 		args = append(args, opts.Channel)
 	}
 	if opts.Guild != "" {
-		conditions = append(conditions, "g.name = ?")
+		conditions = append(conditions, "COALESCE(g.name, gc.name) = ?")
 		args = append(args, opts.Guild)
 	}
 
@@ -52,13 +52,14 @@ func (db *DB) SearchMessages(query string, opts SearchOptions) ([]SearchResult, 
 	q := fmt.Sprintf(`
 		SELECT
 			m.id, m.channel_id, c.name AS channel_name,
-			COALESCE(g.name, 'DM') AS guild_name,
+			COALESCE(g.name, gc.name, 'DM') AS guild_name,
 			m.author_name, m.content, m.timestamp,
 			rank
 		FROM messages_fts
 		JOIN messages m ON messages_fts.rowid = m.rowid
 		JOIN channels c ON m.channel_id = c.id
 		LEFT JOIN guilds g ON m.guild_id = g.id
+		LEFT JOIN guilds gc ON c.guild_id = gc.id
 		WHERE messages_fts MATCH ?
 		%s
 		ORDER BY rank
